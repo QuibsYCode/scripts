@@ -34,7 +34,7 @@ for organization in orgID:
     response_data = response.json()
     bearer_token = response_data.get("access_token")
 
-    # Form the request, setting for 30 day histry by default
+    # Form the request, setting for 30 day history by default
     headers = {
         'Authorization': f"Bearer {bearer_token}",
     }
