@@ -49,19 +49,21 @@ for organization in orgID:
     # Return the results, formatted as I like 
     if response.status_code == 200:
         print()
-        print(f"Organization: {orgName}")
+        print(f"{orgName}\n")
         response_data = response.json()
         for item in response_data['data']:
             domain = item['domain']
             request = item['summary']['requests']
             requestallow = item['summary']['requestsallowed']
             requestblock = item['summary']['requestsblocked']
-            if requestallow > 0 and requestblock == 0:
+            if (requestallow > 0 and requestblock == 0):
                 domaincheck = f"{domain}: Allowed."
-            if requestallow == 0 and requestblock > 0:
+            if (requestallow == 0 and requestblock > 0):
                 domaincheck = f"{domain}: Blocked."
-            if requestallow == 0 and requestblock == 0:
+            if (requestallow == 0 and requestblock == 0):
                 domaincheck = f"{domain}: Selectively Proxied."
+            if (requestallow and requestblock > 0):
+                domaincheck = f"{domain}: Inconclusive"
             print()
             print(f"\t{domaincheck}")
             print(f"\t\tRequest Count: {request}")
