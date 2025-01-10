@@ -53,7 +53,7 @@ for organization in orgID:
             allowed_verdict = 0
             blocked_verdict = 0
             proxy_verdict = 0
-            final_verdict = "No Traffic Found"
+            final_verdict = "No Traffic Found\t\t"
             results = []
             abnormal = {}
             response_data = response.json()
@@ -71,11 +71,11 @@ for organization in orgID:
                     proxy_verdict += 1
                 if (request_count != 0):
                     if (allowed_verdict > 0 and proxy_verdict == 0 and blocked_verdict == 0):
-                        final_verdict = f"Allowed. Count: {allowed_verdict}"
+                        final_verdict = f"Allowed.\t\tCount: {allowed_verdict}"
                     elif (allowed_verdict == 0 and proxy_verdict == 0 and blocked_verdict > 0):
-                        final_verdict = f"Blocked. Count: {blocked_verdict}"
+                        final_verdict = f"Blocked.\t\tCount: {blocked_verdict}"
                     elif (allowed_verdict == 0 and proxy_verdict > 0 and blocked_verdict == 0):
-                        final_verdict = f"Proxied. Count: {proxy_verdict}"
+                        final_verdict = f"Proxied.\t\tCount: {proxy_verdict}"
                     else:
                         final_verdict = f"Undetermined. Allowed Count: {allowed_verdict}, Blocked Count: {blocked_verdict}, Proxied Count: {proxy_verdict}"
-            print(f"\t{domain}:\t{final_verdict}")
+            print(f"\t{final_verdict}\t\t{domain}")
