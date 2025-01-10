@@ -22,13 +22,14 @@ for organization in orgID:
             orgName = "ORG NAME"
     else:
         orgName = "Not Found"
-    
+    print(orgName)
     # Post the access token for the specific organization and retrieve the bearer token
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-Umbrella-OrgId': organization,
         'Authorization': f"Basic {access_token}",
     }
+
     token_url = "https://api.umbrella.com/auth/v2/token"
     response = requests.post(token_url, headers=headers)
     response_data = response.json()
@@ -38,37 +39,42 @@ for organization in orgID:
     headers = {
         'Authorization': f"Bearer {bearer_token}",
     }
-    params = {
-        'to': 'now',
-        'from': '-30days',
-        'domains': domains,
-    }
-    url = f"https://reports.api.umbrella.com/v2/organizations/{organization}/summaries-by-destination/dns"
-    response = requests.get(url, params=params, headers=headers)
+    for domain in domains:
+        params = {
+            'to': 'now',
+            'from': '-30days',
+            'limit': '100',
+            'domains': domain,
+        }
 
-    # Return the results, formatted as I like 
-    if response.status_code == 200:
-        print()
-        print(f"{orgName}\n")
-        response_data = response.json()
-        for item in response_data['data']:
-            domain = item['domain']
-            request = item['summary']['requests']
-            requestallow = item['summary']['requestsallowed']
-            requestblock = item['summary']['requestsblocked']
-            if (requestallow > 0 and requestblock == 0):
-                domaincheck = f"{domain}: Allowed."
-            if (requestallow == 0 and requestblock > 0):
-                domaincheck = f"{domain}: Blocked."
-            if (requestallow == 0 and requestblock == 0):
-                domaincheck = f"{domain}: Selectively Proxied."
-            if (requestallow and requestblock > 0):
-                domaincheck = f"{domain}: Inconclusive"
-            print()
-            print(f"\t{domaincheck}")
-            print(f"\t\tRequest Count: {request}")
-            print(f"\t\tRequests Allowed: {requestallow}")
-            print(f"\t\tRequests Blocked: {requestblock}")
-            print()
-    else:
-        print(f"Error {response.status_code}: {response.text}")
+        response = requests.get('https://api.umbrella.com/reports/v2/activity/dns', params=params, headers=headers)
+        if response.status_code == 200:
+            request_count = 0
+            allowed_verdict = 0
+            blocked_verdict = 0
+            proxy_verdict = 0
+            results = []
+            abnormal = {}
+            response_data = response.json()
+            for item in response_data['data']:
+
+                checked_domain = item['domain']
+                if checked_domain == domain:
+                    request_count += 1
+                verdict = item['verdict']
+                if verdict == "allowed":
+                    allowed_verdict += 1
+                if verdict == "blocked":
+                    blocked_verdict += 1
+                if verdict == "proxied":
+                    proxy_verdict += 1
+                if (request_count != 0):
+                    if (allowed_verdict > 0 and proxy_verdict == 0 and blocked_verdict == 0):
+                        final_verdict = f"Allowed. Count: {allowed_verdict}"
+                    elif (allowed_verdict == 0 and proxy_verdict == 0 and blocked_verdict > 0):
+                        final_verdict = f"Blocked. Count: {blocked_verdict}"
+                    elif (allowed_verdict == 0 and proxy_verdict > 0 and blocked_verdict == 0):
+                        final_verdict = f"Proxied. Count: {proxy_verdict}"
+                    else:
+                        final_verdict = f"Undetermined. Allowed Count: {allowed_verdict}, Blocked Count: {blocked_verdict}, Proxied Count: {proxy_verdict}"
+            print(f"\t{domain}:\t{final_verdict}")
