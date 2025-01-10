@@ -53,6 +53,7 @@ for organization in orgID:
             allowed_verdict = 0
             blocked_verdict = 0
             proxy_verdict = 0
+            final_verdict = "No Traffic Found"
             results = []
             abnormal = {}
             response_data = response.json()
